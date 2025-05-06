@@ -10,8 +10,10 @@ class CodeEngine(LLMTool):
     description: str = "A coding tool that can take a prompt and generate executable Python code. It parses and executes the code. Returns the code and the error if the code execution fails."
     arg: str = "A single string parameter describing the coding task."
 
-    def __init__(self, client_details: dict = None, **data):
-        super().__init__(client_details=client_details, **data)
+    def __init__(self, client_details: dict = None, model_name:str ='', temp:float = 0.7, max_tokens:int = 4000,**data):
+        super().__init__(client_details=client_details, model_name=model_name,**data)
+        self.temperature = temp if temp else 0.7
+        self.max_tokens = max_tokens if max_tokens else 4000
     
     def parse_and_exec_code(self, response: str):
         result = re.search(r'```python\s*([\s\S]*?)\s*```', response)
@@ -41,23 +43,23 @@ class CodeEngine(LLMTool):
             return code_string, e
         return code_string, None
 
-    def generate_code(self, prompt):
+    def generate_code(self, prompt, temp, max_tokens):
         response = self.client.chat.completions.create(
             model=self.model,
             messages=[
                 {"role": "system", "content": "You are a Python code generator. Respond only with executable Python code, no explanations or comments except for required pip installations at the top. Return the code within ```python and ``` strings. The first line should be commented out pip install statement"},
                 {"role": "user", "content": f"Generate Python code to {prompt}. If you need to use any external libraries, include a comment at the top of the code listing the required pip installations."}
             ],
-            max_tokens=4000,
-            temperature=0.7
+            max_tokens=max_tokens,
+            temperature=temp,
         )
         response = response.choices[0].message.content
         code, error = self.parse_and_exec_code(response)
         return code, error
 
-    def run(self, prompt: str) -> str:
-        print(f"Calling Code Generation Tool with the prompt: {prompt}")
-        code, error = self.generate_code(prompt)
+    def run(self, prompt: str, temp = 0.7, max_tokens= 4000) -> str:
+        print(f"Calling Code Generation Tool with the prompt: {prompt}, temp: {temp}, max_tokens: {max_tokens}")
+        code, error = self.generate_code(prompt, temp, max_tokens)
         if error:
             return f"Code: {code}\n\nCode execution caused an error: {error}"
         return f"Code: {code}\n\n\nCode Executed Successfully"

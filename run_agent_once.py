@@ -1,56 +1,53 @@
 from agentpro import AgentPro
-from agentpro.tools import (
-    AresInternetTool, CodeEngine, YouTubeSearchTool,
-    SlideGenerationTool, NoteManager, FAISSVectorDB, PlannerTool
-)
+from agentpro.tools import (AresInternetTool, CodeEngine, YouTubeSearchTool,SlideGenerationTool)
 import os
 import dotenv
-from sentence_transformers import SentenceTransformer
-import faiss
 import numpy as np
 
 
-def run_agent_once(prompt: str):
+def run_agent_once(prompt: str, temperature: float = 0.4, max_tokens: int = 4000):
     dotenv.load_dotenv()
 
     use_openrouter = os.getenv("OPENROUTER_API_KEY") is not None
 
-    client_details = {
-        "api_key": os.getenv("OPENROUTER_API_KEY") if use_openrouter else os.getenv("OPENAI_API_KEY"),
-        "api_base": "https://openrouter.ai/api/v1" if use_openrouter else "https://api.openai.com/v1/",
-        "MODEL": os.getenv("MODEL_NAME"),
-        "api_type": "openrouter" if use_openrouter else "openai"
-    }
+    if use_openrouter:
+        print('Using OpenRouter API')
+        client_details = {
+            "api_key": os.getenv("OPENROUTER_API_KEY"),
+            "api_base": "https://openrouter.ai/api/v1",
+            "MODEL": os.getenv("MODEL_NAME"),
+            "api_type": "openrouter"
+        }
+        CODE_MODEL=os.getenv("CODE_MODEL_NAME") if os.getenv("CODE_MODEL_NAME") else "gpt-4o-mini"
+        ARES_MODEL=os.getenv("ARES_MODEL_NAME") if os.getenv("ARES_MODEL_NAME") else "gpt-4o-mini"
+        SLIDE_MODEL=os.getenv("SLIDE_MODEL_NAME") if os.getenv("SLIDE_MODEL_NAME") else "gpt-4o-mini"
+    else:
+        if not os.environ.get("OPENAI_API_KEY"):
+            print("Error: OPENAI_API_KEY environment variable is not set.")
+            return
 
-    embedding_model = SentenceTransformer("all-MiniLM-L6-v2")
-    note_store = []
-    faiss_index = faiss.IndexFlatIP(embedding_model.get_sentence_embedding_dimension())
-    vector_db = FAISSVectorDB(faiss_index, note_store)
+        client_details = {
+            "api_key": os.getenv("OPENAI_API_KEY"),
+            "api_base": "https://api.openai.com/v1/",
+            "MODEL": os.getenv("MODEL_NAME"),
+            "api_type": "openai"
+        }
+        CODE_MODEL="gpt-4o-mini"
+        ARES_MODEL="gpt-4o-mini"
+        SLIDE_MODEL="gpt-4o-mini"
 
-    youtube_tool_instance = YouTubeSearchTool(client_details=client_details)
+    code_tool = CodeEngine(client_details=client_details, model=CODE_MODEL)
+    youtube_tool = YouTubeSearchTool(client_details=client_details, model=ARES_MODEL)
+    slide_tool = SlideGenerationTool(client_details=client_details, model=SLIDE_MODEL)
 
     common_tools = [
-        AresInternetTool(),
-        CodeEngine(client_details),
-        youtube_tool_instance,
-        SlideGenerationTool(client_details=client_details)
+        code_tool, youtube_tool, slide_tool
     ]
-
     tools = common_tools.copy()
-
     if os.environ.get("TRAVERSAAL_ARES_API_KEY"):
-        note_manager_tool = NoteManager(
-            vector_db=vector_db,
-            embedding_model=embedding_model,
-            youtube_tool=youtube_tool_instance,
-            ares_tool=common_tools[0]
-        )
-        tools.append(note_manager_tool)
+        ares_tool = AresInternetTool(client_details=client_details, model=ARES_MODEL)
+        tools.append(ares_tool)
 
-    sub_agent = AgentPro(tools=common_tools, client_details=client_details if use_openrouter else None)
-    planner_tool = PlannerTool(sub_agent=sub_agent)
-    tools.append(planner_tool)
-
-    agent = AgentPro(tools=tools, client_details=client_details if use_openrouter else None)
+    agent = AgentPro(tools=tools, client_details=client_details if use_openrouter else None, temperature=temperature, max_tokens=max_tokens)
     
     return agent(prompt)

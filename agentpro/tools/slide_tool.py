@@ -17,8 +17,8 @@ class SlideGenerationTool(Tool):
     def __init__(self, client_details: dict = None, **data):
         super().__init__(client_details=client_details, **data)
 
-    def run(self, slide_content: Union[str, List[Dict[str, str]]]) -> dict:
-        print(f"📥 Slide Generation Tool received input of type: {type(slide_content)}")
+    def run(self, slide_content: Union[str, List[Dict[str, str]]], temp = 0.7, max_tokens= 4000) -> dict:
+        print(f"📥 Slide Generation Tool received input of type: {type(slide_content)} with temp: {temp}, max_tokens: {max_tokens}")
         print("🛠️ Processing slide content...")
 
         # If input is string, try to parse as JSON

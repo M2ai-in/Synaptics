@@ -100,7 +100,7 @@ class YouTubeSearchTool(LLMTool):
         except Exception as e:
             return None
 
-    def run(self, prompt: str) -> str:
+    def run(self, prompt: str, temp = 0.0, max_tokens= 4000) -> str:
         print(f"Calling YouTube Search Tool with prompt: {prompt}")
         try:
             # Search for videos

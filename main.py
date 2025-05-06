@@ -1,12 +1,7 @@
 from agentpro import AgentPro
-from agentpro.tools import (
-    AresInternetTool, CodeEngine, YouTubeSearchTool,
-    SlideGenerationTool, NoteManager, FAISSVectorDB, PlannerTool
-)
+from agentpro.tools import (AresInternetTool, CodeEngine, YouTubeSearchTool,SlideGenerationTool)
 import os
 import dotenv
-from sentence_transformers import SentenceTransformer
-import faiss
 import numpy as np
 
 def main():
@@ -22,6 +17,9 @@ def main():
             "MODEL": os.getenv("MODEL_NAME"),
             "api_type": "openrouter"
         }
+        CODE_MODEL=os.getenv("CODE_MODEL_NAME") if os.getenv("CODE_MODEL_NAME") else "gpt-4o-mini"
+        ARES_MODEL=os.getenv("ARES_MODEL_NAME") if os.getenv("ARES_MODEL_NAME") else "gpt-4o-mini"
+        SLIDE_MODEL=os.getenv("SLIDE_MODEL_NAME") if os.getenv("SLIDE_MODEL_NAME") else "gpt-4o-mini"
     else:
         if not os.environ.get("OPENAI_API_KEY"):
             print("Error: OPENAI_API_KEY environment variable is not set.")
@@ -33,42 +31,23 @@ def main():
             "MODEL": os.getenv("MODEL_NAME"),
             "api_type": "openai"
         }
+        CODE_MODEL="gpt-4o-mini"
+        ARES_MODEL="gpt-4o-mini"
+        SLIDE_MODEL="gpt-4o-mini"
 
-    embedding_model = SentenceTransformer("all-MiniLM-L6-v2")
-    note_store = []
-    faiss_index = faiss.IndexFlatIP(embedding_model.get_sentence_embedding_dimension())
-    vector_db = FAISSVectorDB(faiss_index, note_store)
-
-    youtube_tool_instance = YouTubeSearchTool(client_details=client_details)
-
+    code_tool = CodeEngine(client_details=client_details, model=CODE_MODEL)
+    youtube_tool = YouTubeSearchTool(client_details=client_details, model=ARES_MODEL)
+    slide_tool = SlideGenerationTool(client_details=client_details, model=SLIDE_MODEL)
+    
     common_tools = [
-        AresInternetTool(),
-        CodeEngine(client_details),
-        youtube_tool_instance,
-        SlideGenerationTool(client_details=client_details)
+        code_tool, youtube_tool, slide_tool
     ]
-
-    # Optional tools
     tools = common_tools.copy()
-
     if os.environ.get("TRAVERSAAL_ARES_API_KEY"):
-        note_manager_tool = NoteManager(
-            vector_db=vector_db,
-            embedding_model=embedding_model,
-            youtube_tool=youtube_tool_instance,
-            ares_tool=common_tools[0]  # AresInternetTool
-        )
-        tools.append(note_manager_tool)
+        ares_tool = AresInternetTool(client_details=client_details, model=ARES_MODEL)
+        tools.append(ares_tool)
 
-    # Create a sub-agent with all common tools (for planner)
-    sub_agent = AgentPro(tools=common_tools, client_details=client_details if use_openrouter else None)
-
-    # Add the PlannerTool with the sub-agent injected
-    planner_tool = PlannerTool(sub_agent=sub_agent)
-    tools.append(planner_tool)
-
-    # Main agent
-    agent = AgentPro(tools=tools, client_details=client_details if use_openrouter else None)
+    agent = AgentPro(tools=tools, client_details=client_details if use_openrouter else None, temperature=0.4, max_tokens=4000)
 
     print("AgentPro is initialized and ready. Enter 'quit' to exit.")
     print("Available tools:")
