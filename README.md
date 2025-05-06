@@ -8,7 +8,7 @@ Welcome to **Teacher Agent**, a smart AI-driven learning assistant built using t
 - Searching and managing your notes using embeddings,
 - Creating slides of contents,
 - Integrating multiple AI capabilities under one unified system.
-
+  
 <p align="center">
   <img src="https://img.shields.io/badge/Python-3.8%2B-blue" alt="Python 3.8+">
   <img src="https://img.shields.io/badge/License-Apache%202.0-blue" alt="License: Apache 2.0">
