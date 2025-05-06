@@ -11,7 +11,7 @@ class YouTubeSearchTool(LLMTool):
     # Specific Parameters
     ddgs: Any = None
     
-    def __init__(self, client_details: dict = None, **data):
+    def __init__(self, client_details: dict = None, model_name:str ='gpt-4o-mini' ,**data):
         super().__init__(client_details=client_details, **data)
         if self.ddgs is None:
             self.ddgs = DDGS()

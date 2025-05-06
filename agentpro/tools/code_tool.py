@@ -8,14 +8,16 @@ from .base import LLMTool
 class CodeEngine(LLMTool):
     name: str = "Code Generation and Execution Tool"
     description: str = "A coding tool that can take a prompt and generate executable Python code. It parses and executes the code. Returns the code and the error if the code execution fails."
-    arg: str = "A single string parameter describing the coding task."
+    arg: str = "A single string parameter describing the coding task. Donot include any code or comments. The tool will generate the code for you."
 
     def __init__(self, client_details: dict = None, model_name:str ='', temp:float = 0.7, max_tokens:int = 4000,**data):
         super().__init__(client_details=client_details, model_name=model_name,**data)
+        print(f"Using model: {self.model} for code generation")
         self.temperature = temp if temp else 0.7
         self.max_tokens = max_tokens if max_tokens else 4000
     
     def parse_and_exec_code(self, response: str):
+        print("Parsing and executing code...")
         result = re.search(r'```python\s*([\s\S]*?)\s*```', response)
         if not result:
             return "No Python code block found", "Failed to extract code"
@@ -44,6 +46,7 @@ class CodeEngine(LLMTool):
         return code_string, None
 
     def generate_code(self, prompt, temp, max_tokens):
+        print(f"🎉Generating code for prompt")
         response = self.client.chat.completions.create(
             model=self.model,
             messages=[
@@ -53,12 +56,14 @@ class CodeEngine(LLMTool):
             max_tokens=max_tokens,
             temperature=temp,
         )
+        print(f"Generated code: {response}")
         response = response.choices[0].message.content
+        print(f"Generated code: {response}")
         code, error = self.parse_and_exec_code(response)
         return code, error
 
     def run(self, prompt: str, temp = 0.7, max_tokens= 4000) -> str:
-        print(f"Calling Code Generation Tool with the prompt: {prompt}, temp: {temp}, max_tokens: {max_tokens}")
+        print(f"📥 Code Generation Tool received: {prompt} with temp: {temp}, max_tokens: {max_tokens}")
         code, error = self.generate_code(prompt, temp, max_tokens)
         if error:
             return f"Code: {code}\n\nCode execution caused an error: {error}"

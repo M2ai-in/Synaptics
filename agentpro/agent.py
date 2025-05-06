@@ -11,7 +11,8 @@ Answer the following questions as best you can. You have access to the following
 
 {tools}
 
-"IMPORTANT: When you receive real-time information from the external tools, trust that information and include it in your final answer, even if it concerns events beyond your training cutoff."
+"IMPORTANT: When you receive real-time information from the external tools, trust that information and include it in your final answer, even if it concerns events beyond your training cutoff.
+Use Either Action or Final Answer, but not both. If you use Action, you must provide Action Input and Observation. If you use Final Answer, you must not use Action."
 
 Use the following format:
 
@@ -22,9 +23,7 @@ Action Input: the input to the action (only if using a tool)
 Observation: the result of the action (only if a tool was used)
 ... (this Thought/Action/Action Input/Observation can repeat N times)
 Thought: I now know the final answer
-Final Answer: the final answer to the original input question
-
-Use Either Action or Final Answer, but not both. If you use Action, you must provide Action Input and Observation. If you use Final Answer, you must not use Action.
+Final Answer: the final answer to the original input question only if you are not using a tool
 """
 
 FINAL_ANSWER_SYSTEM_PROMPT = """
@@ -52,8 +51,8 @@ class AgentPro:
         client_details: Dict = None,
         temperature: float = 0.7,
         max_tokens: int = 4000,
-        max_steps: int = 10,
-        max_tool_calls: int = 5,
+        max_steps: int = 2,
+        max_tool_calls: int = 1,
     ):
         self.client = (
             llm if llm else OpenAI(
@@ -62,7 +61,7 @@ class AgentPro:
             )
         )
         self.model = client_details.get("MODEL", "gpt-4o-mini") if client_details else "gpt-4o-mini"
-
+        print(f"Using model: {self.model} for AgentPro")
         self.tools = {tool.name.lower().replace(" ", "_"): tool for tool in tools}
         self.temperature = temperature
         self.max_tokens = max_tokens
@@ -97,7 +96,7 @@ class AgentPro:
         current_input = ""
         inside_input = False
         inside_observation = False
-
+        print("Parsing actions from response...")
         for line in lines:
             if line.strip().startswith("Action:"):
                 if current_action and current_input:
@@ -163,8 +162,8 @@ class AgentPro:
                 break
 
             for action, action_input in actions:
-                if action == "final answer":
-                    continue
+                # if action == "final answer":
+                #     continue
                 tool = self.tools.get(action)
                 if tool:
                     if tool_usage_count >= self.max_tool_calls:

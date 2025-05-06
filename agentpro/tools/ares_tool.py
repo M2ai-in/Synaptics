@@ -26,6 +26,7 @@ class AresInternetTool(Tool):
             "x-api-key": self.x_api_key,
             "content-type": "application/json"
         })
+        print(f"Response: {response.status_code} - {response.text}")
         if response.status_code != 200:
             return f"Error: {response.status_code} - {response.text}"
         response = response.json()

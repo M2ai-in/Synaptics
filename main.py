@@ -18,7 +18,7 @@ def main():
             "api_type": "openrouter"
         }
         CODE_MODEL=os.getenv("CODE_MODEL_NAME") if os.getenv("CODE_MODEL_NAME") else "gpt-4o-mini"
-        ARES_MODEL=os.getenv("ARES_MODEL_NAME") if os.getenv("ARES_MODEL_NAME") else "gpt-4o-mini"
+        YT_MODEL=os.getenv("YT_MODEL_NAME") if os.getenv("YT_MODEL_NAME") else "gpt-4o-mini"
         SLIDE_MODEL=os.getenv("SLIDE_MODEL_NAME") if os.getenv("SLIDE_MODEL_NAME") else "gpt-4o-mini"
     else:
         if not os.environ.get("OPENAI_API_KEY"):
@@ -32,19 +32,19 @@ def main():
             "api_type": "openai"
         }
         CODE_MODEL="gpt-4o-mini"
-        ARES_MODEL="gpt-4o-mini"
+        YT_MODEL="gpt-4o-mini"
         SLIDE_MODEL="gpt-4o-mini"
 
-    code_tool = CodeEngine(client_details=client_details, model=CODE_MODEL)
-    youtube_tool = YouTubeSearchTool(client_details=client_details, model=ARES_MODEL)
-    slide_tool = SlideGenerationTool(client_details=client_details, model=SLIDE_MODEL)
+    code_tool = CodeEngine(client_details=client_details, model_name=CODE_MODEL)
+    youtube_tool = YouTubeSearchTool(client_details=client_details, model_name=YT_MODEL)
+    slide_tool = SlideGenerationTool(client_details=client_details, model_name=SLIDE_MODEL)
     
     common_tools = [
         code_tool, youtube_tool, slide_tool
     ]
     tools = common_tools.copy()
     if os.environ.get("TRAVERSAAL_ARES_API_KEY"):
-        ares_tool = AresInternetTool(client_details=client_details, model=ARES_MODEL)
+        ares_tool = AresInternetTool(client_details=client_details)
         tools.append(ares_tool)
 
     agent = AgentPro(tools=tools, client_details=client_details if use_openrouter else None, temperature=0.4, max_tokens=4000)
