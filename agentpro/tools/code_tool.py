@@ -62,9 +62,22 @@ class CodeEngine(LLMTool):
         code, error = self.parse_and_exec_code(response)
         return code, error
 
-    def run(self, prompt: str, temp = 0.7, max_tokens= 4000) -> str:
-        print(f"📥 Code Generation Tool received: {prompt} with temp: {temp}, max_tokens: {max_tokens}")
-        code, error = self.generate_code(prompt, temp, max_tokens)
+    def run(self, prompt: str, temp=0.7, max_tokens=4000) -> str:
+        print(f"Code Generation Tool received: {prompt} with temp: {temp}, max_tokens: {max_tokens}")
+        is_code = (
+            prompt.strip().startswith("```python") or
+            prompt.strip().startswith("#") or
+            prompt.strip().startswith("import") or
+            "def " in prompt or
+            "class " in prompt or
+            prompt.strip().endswith(":")
+        )
+        if is_code:
+            print("Detected raw Python code input, executing directly...")
+            code, error = self.parse_and_exec_code(prompt)
+        else:
+            print("Treating input as natural language prompt, generating code...")
+            code, error = self.generate_code(prompt, temp, max_tokens)
         if error:
             return f"Code: {code}\n\nCode execution caused an error: {error}"
         return f"Code: {code}\n\n\nCode Executed Successfully"
