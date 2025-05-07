@@ -10,18 +10,14 @@ class YouTubeSearchTool(LLMTool):
     ddgs: Any = None
     def __init__(self, client_details: dict = None, model_name:str ='gpt-4o-mini' ,**data):
         super().__init__(client_details=client_details, **data)
-        if self.ddgs is None:
-            self.ddgs = DDGS()
+        if self.ddgs is None: self.ddgs = DDGS()
     def extract_video_id(self, url):
         """Extract video ID from YouTube URL."""
         parsed_url = urlparse(url)
         if parsed_url.hostname in ['www.youtube.com', 'youtube.com']:
-            if parsed_url.path == '/watch':
-                return parse_qs(parsed_url.query)['v'][0]
-            elif parsed_url.path.startswith('/shorts/'):
-                return parsed_url.path.split('/')[2]
-        elif parsed_url.hostname == 'youtu.be':
-            return parsed_url.path[1:]
+            if parsed_url.path == '/watch': return parse_qs(parsed_url.query)['v'][0]
+            elif parsed_url.path.startswith('/shorts/'): return parsed_url.path.split('/')[2]
+        elif parsed_url.hostname == 'youtu.be': return parsed_url.path[1:]
         return None
     def search_videos(self, query, max_results=5):
         """Search YouTube videos using DuckDuckGo."""
@@ -35,9 +31,7 @@ class YouTubeSearchTool(LLMTool):
                 duration="medium",
                 max_results=max_results*2
             )
-            results = sorted(
-                results,
-                key=lambda x: (-(x['statistics']['viewCount'] if x['statistics']['viewCount'] is not None else float('-inf'))))[:max_results]
+            results = sorted(results, key=lambda x: (-(x['statistics']['viewCount'] if x['statistics']['viewCount'] is not None else float('-inf'))))[:max_results]
             videos = []
             for result in results:
                 video_url = result.get('content')  # The actual video URL is in the 'content' field
@@ -56,11 +50,9 @@ class YouTubeSearchTool(LLMTool):
                         'thumbnail': result.get('images', {}).get('large', '')
                     }
                     videos.append(video_data)
-            if not videos:
-                return "No YouTube videos found in the search results."
+            if not videos: return "No YouTube videos found in the search results."
             return videos[:max_results]
-        except Exception as e:
-            return f"Error searching videos: {str(e)}"
+        except Exception as e: return f"Error searching videos: {str(e)}"
     def get_transcript(self, video_id):
         """Get transcript for a YouTube video."""
         try:
@@ -78,32 +70,23 @@ class YouTubeSearchTool(LLMTool):
                     {"role": "system", "content": "You are an expert content creator specializing in creating high-quality content from video transcripts."},
                     {"role": "user", "content": f"{prompt}\n\nTranscript:\n{transcript}"}
                 ],
-                max_tokens=2000
+                max_tokens=2000 ###########################
             )
             return response.choices[0].message.content.strip()
-        except Exception as e:
-            return None
-    def run(self, prompt: str, temp = 0.0, max_tokens= 4000) -> str:
+        except Exception as e: return None
+    def run(self, prompt: str, temp = 0.0, max_tokens= 4000) -> str: ###########################
         print(f"Calling YouTube Search Tool with prompt: {prompt}")
         try:
             videos = self.search_videos(prompt, 3)
-            if isinstance(videos, str):  # Error occurred
-                return f"Search error: {videos}"
-            if not videos:  # No videos found
-                return "No videos found matching the query."
+            if isinstance(videos, str): return f"Search error: {videos}"
+            if not videos: return "No videos found matching the query."
             results = []
             for video in videos:
                 transcript = self.get_transcript(video['video_id'])
-                if not transcript:
-                    continue
+                if not transcript: continue
                 content = self.summarize_content(transcript)
-                results.append({
-                    "video": video,
-                    "content": content.replace("\n\n", "\n").replace("\n\n\n", "\n")
-                })
-            if not results:
-                return "Could not process any videos. Try a different search query."
+                results.append({"video": video, "content": content.replace("\n\n", "\n").replace("\n\n\n", "\n")})
+            if not results: return "Could not process any videos. Try a different search query."
             results = list(map(lambda x: f"Video Title: {x['video']['title']}\nContent: {x['content']}", results))
             return "\n\n\n".join(results)
-        except Exception as e:
-            return f"Error executing task: {str(e)}"
+        except Exception as e: return f"Error executing task: {str(e)}"
