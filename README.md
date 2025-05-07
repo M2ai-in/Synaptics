@@ -18,8 +18,8 @@
 1. Clone the repository and install the required packages:
 
 ```bash
-git clone [https://github.com/yourusername/agentpro.git](https://github.com/SidWorks01/Traversaal-x-Optimized-AI-Hackathon.git)
-cd Traversaal-x-Optimized-AI-Hackathon
+git clone [https://github.com/yourusername/agentpro.git](https://github.com/jebish/Agentpro.git)
+cd Agentpro
 ```
 
 2. Create a Virtual Environment & Install Dependencies:
