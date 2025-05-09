@@ -68,4 +68,4 @@ class AgentRunner:
             tools.append(AresInternetTool(client_details=self.client_details))
         return tools
     def run(self, prompt: str, clear_history:bool=False) -> str:
-        return self.agent(prompt, clear_history)
+        return self.agent(prompt, clear_history=clear_history)
