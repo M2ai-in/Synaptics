@@ -138,7 +138,9 @@ class AgentPro:
                 else:
                     raise e
         return "Error: Rate limit exceeded multiple times."
-    def __call__(self, prompt: str, temperature: float = None, max_tokens: int = None) -> str:
+    def __call__(self, prompt: str, temperature: float = None, max_tokens: int = None, clear_history:bool=False) -> str:
+        if clear_history:
+            self.clear_history()
         temperature = temperature if temperature is not None else self.temperature
         max_tokens = max_tokens if max_tokens is not None else self.max_tokens
         response = self.generate_response(prompt, temperature, max_tokens)
