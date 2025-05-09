@@ -67,5 +67,5 @@ class AgentRunner:
         if os.getenv("TRAVERSAAL_ARES_API_KEY"):
             tools.append(AresInternetTool(client_details=self.client_details))
         return tools
-    def run(self, prompt: str) -> str:
-        return self.agent(prompt, clear_history=True)
+    def run(self, prompt: str, clear_history:bool=False) -> str:
+        return self.agent(prompt, clear_history)
