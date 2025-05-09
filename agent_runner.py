@@ -69,3 +69,16 @@ class AgentRunner:
         return tools
     def run(self, prompt: str, clear_history:bool=False) -> str:
         return self.agent(prompt, clear_history=clear_history)
+if __name__ == "__main__":
+    print("Starting AgentPro...")
+    agent_runner = AgentRunner()
+    print("AgentPro is initialized and ready. Enter 'quit' to exit.")
+    while True:
+        user_input = input("\nEnter your query: ")
+        if user_input.lower() in ["quit", "exit", "q"]:
+            break
+        try:
+            response = agent_runner.run(user_input, clear_history=True)
+            print(f"\nAgent Response:\n{response}")
+        except Exception as e:
+            print(f"Error: {e}")
