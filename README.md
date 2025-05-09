@@ -1,35 +1,3 @@
-# 🧠 Teacher Agent (Traversaal x Optimized AI Hackathon)
-
-Welcome to **Teacher Agent**, a smart AI-driven learning assistant built using the AgentPro-Ex framework and custom tool. AgentPro-Ex is our extension of the AgentPro framework that adds accessibility by allowing the usage of OpenRouter in addition to OpenAI. The Teacher Agent is your self-sufficient advisor agent who helps develop learning paths for the topics you are interested in. Teacher Agent is capable of:
-
-- Creating structured learning paths,
-- Recommending high-quality educational YouTube videos,
-- Summarizing topics and generating study notes,
-- Searching and managing your notes using embeddings,
-- Creating slides of contents,
-- Integrating multiple AI capabilities under one unified system.
-
-<p align="center">
-  <img src="https://img.shields.io/badge/Python-3.8%2B-blue" alt="Python 3.8+">
-  <img src="https://img.shields.io/badge/License-Apache%202.0-blue" alt="License: Apache 2.0">
-</p>
-
-## ✨ Features
-
-### 🎓 Planner Tool
-Acts as your tutor:
-- planned deep learning: Breaks broad topics into structured, digestible subtopics.
-- recommend videos: Find and suggest relevant YouTube videos.
-- summarize notes: Summarize web/YT content into concise notes.
-
-### 📝 Note Manager Tool
-Enhances your note-taking experience:
-- stores your notes and YouTube transcripts.
-- Lets you search, retrieve, and summarize notes contextually.
-
-### 🔓 OpenRouter API
-Utilize different models from the OpenRouter platform or default to OpenAI models.
-
 ## 🛠️ Tech Stack & Agent Architecture
 
 - **LLM Gateway**: OpenRouter + OpenAI (via AgentPro)
@@ -50,8 +18,8 @@ Utilize different models from the OpenRouter platform or default to OpenAI model
 1. Clone the repository and install the required packages:
 
 ```bash
-git clone [https://github.com/yourusername/agentpro.git](https://github.com/SidWorks01/Traversaal-x-Optimized-AI-Hackathon.git)
-cd Traversaal-x-Optimized-AI-Hackathon
+git clone [https://github.com/yourusername/agentpro.git](https://github.com/jebish/Agentpro.git)
+cd Agentpro
 ```
 
 2. Create a Virtual Environment & Install Dependencies:

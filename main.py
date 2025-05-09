@@ -31,36 +31,34 @@ def main():
         CODE_MODEL="gpt-4o-mini"
         YT_MODEL="gpt-4o-mini"
         SLIDE_MODEL="gpt-4o-mini"
-        DATA_MODEL="gpt-4o-mini"
+
     code_tool = CodeEngine(client_details=client_details, model_name=CODE_MODEL)
     youtube_tool = YouTubeSearchTool(client_details=client_details, model_name=YT_MODEL)
     slide_tool = SlideGenerationTool(client_details=client_details, model_name=SLIDE_MODEL)
-    data_science_tool = DataScienceTool(client_details=client_details, model_name=DATA_MODEL)
+    
     common_tools = [
-        code_tool, youtube_tool, slide_tool, data_science_tool
+        code_tool, youtube_tool, slide_tool
     ]
     tools = common_tools.copy()
     if os.environ.get("TRAVERSAAL_ARES_API_KEY"):
         ares_tool = AresInternetTool(client_details=client_details)
         tools.append(ares_tool)
 
-    agent = AgentPro(tools=tools, client_details=client_details if use_openrouter else None, temperature=0.1, max_tokens=4000)
+    agent = AgentPro(tools=tools, client_details=client_details if use_openrouter else None, temperature=0.4, max_tokens=4000)
+
     print("AgentPro is initialized and ready. Enter 'quit' to exit.")
     print("Available tools:")
     for tool in tools:
         print(f"- {tool.name}: {tool.description}")
-
     while True:
         user_input = input("\nEnter your query: ")
         if user_input.lower() in ["quit", "exit", "q"]:
             break
-
         try:
             response = agent(user_input)
             print(f"\nAgent Response:\n{response}")
         except Exception as e:
             print(f"Error: {e}")
-
 if __name__ == "__main__":
     print("Starting AgentPro...")
     main()

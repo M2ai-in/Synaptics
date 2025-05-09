@@ -35,13 +35,11 @@ def run_agent_once(prompt: str, temperature: float = 0.4, max_tokens: int = 4000
     code_tool = CodeEngine(client_details=client_details, model_name=CODE_MODEL)
     youtube_tool = YouTubeSearchTool(client_details=client_details, model_name=YT_MODEL)
     slide_tool = SlideGenerationTool(client_details=client_details, model_name=SLIDE_MODEL)
-    data_science_tool = DataScienceTool(client_details=client_details, model_name=DATA_MODEL)
-    common_tools = [
-        code_tool, youtube_tool, slide_tool, data_science_tool
-    ]
+    common_tools = [code_tool, youtube_tool, slide_tool]
     tools = common_tools.copy()
     if os.environ.get("TRAVERSAAL_ARES_API_KEY"):
         ares_tool = AresInternetTool(client_details=client_details)
         tools.append(ares_tool)
     agent = AgentPro(tools=tools, client_details=client_details if use_openrouter else None, temperature=temperature, max_tokens=max_tokens)  
+    agent = AgentPro(tools=tools, client_details=client_details if use_openrouter else None, temperature=temperature, max_tokens=max_tokens)
     return agent(prompt)
