@@ -28,3 +28,4 @@ env/
 agentpro/tools/data_analysis.py
 agentpro/tools/note_manager_tool.py
 agentpro/tools/planner_tool.py
+run_agent_once.py

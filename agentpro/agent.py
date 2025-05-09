@@ -39,7 +39,6 @@ Observation: the result of the action if applicable
 Thought: I now know the final answer
 Final Answer: the final answer to the original input question
 """
-
 class AgentPro:
     def __init__(
         self,
@@ -67,18 +66,21 @@ class AgentPro:
         self.max_tokens = max_tokens
         self.max_steps = max_steps
         self.max_tool_calls = max_tool_calls
-
         tool_descriptions = "\n\n".join(tool.get_tool_description() for tool in tools)
         tool_names = ", ".join(self.tools.keys())
-
         self.react_prompt = react_prompt.format(tools=tool_descriptions, tool_names=tool_names)
         self.final_prompt = final_prompt.format(tools=tool_descriptions, tool_names=tool_names)
-
+        self.system_prompt = system_prompt
         self.messages = []
         if system_prompt:
             self.messages.append({"role": "system", "content": system_prompt})
         self.messages.append({"role": "system", "content": self.react_prompt})
-
+    def clear_history(self):
+        """Resets the conversation to the initial system prompts."""
+        self.messages = []
+        if self.system_prompt:
+            self.messages.append({"role": "system", "content": self.system_prompt})
+        self.messages.append({"role": "system", "content": self.react_prompt})
     def safe_parse_input(self, input_str: str) -> Union[dict, str]:
         input_str = input_str.strip()
         if input_str.startswith("```"):
@@ -88,7 +90,6 @@ class AgentPro:
             return json.loads(input_str)
         except json.JSONDecodeError:
             return input_str
-
     def parse_actions(self, response: str) -> List[tuple]:
         lines = response.splitlines()
         actions = []
@@ -117,12 +118,10 @@ class AgentPro:
         if current_action and current_input:
             actions.append((current_action, self.safe_parse_input(current_input)))
         return actions
-
     def generate_response(self, prompt: str = None, temperature: float = None, max_tokens: int = None) -> str:
         retries = 5
         if prompt:
             self.messages.append({"role": "user", "content": prompt})
-
         for _ in range(retries):
             try:
                 response = self.client.chat.completions.create(
@@ -139,38 +138,31 @@ class AgentPro:
                 else:
                     raise e
         return "Error: Rate limit exceeded multiple times."
-
     def __call__(self, prompt: str, temperature: float = None, max_tokens: int = None) -> str:
         temperature = temperature if temperature is not None else self.temperature
         max_tokens = max_tokens if max_tokens is not None else self.max_tokens
         response = self.generate_response(prompt, temperature, max_tokens)
         last_valid_response = response
         tool_usage_count = 0
-
         for step in range(self.max_steps):
             self.messages.append({"role": "assistant", "content": response})
             print("=" * 80)
             print(response)
             print("=" * 80)
-
             if "Final Answer:" in response and not self.parse_actions(response):
                 print("Final answer found in response.")
                 return response.split("Final Answer:")[-1].strip()
-
             actions = self.parse_actions(response)
             if not actions:
                 print("No actions found and no final answer.")
                 break
-
             for action, action_input in actions:
-                # if action == "final answer":
-                #     continue
                 tool = self.tools.get(action)
                 if tool:
                     if tool_usage_count >= self.max_tool_calls:
                         print("Max tool usage reached.")
                         return last_valid_response
-                    print(f"🛠️ Calling tool: {action} with input: {action_input}")
+                    print(f"\U0001f6e0\ufe0f Calling tool: {action} with input: {action_input}")
                     try:
                         tool_result = tool.run(action_input, temperature, max_tokens)
                         print(f"Tool result: {tool_result}")
@@ -183,10 +175,8 @@ class AgentPro:
                     error_message = f"Observation: Tool '{action}' not found. Available tools: {list(self.tools.keys())}"
                     print(error_message)
                     self.messages.append({"role": "assistant", "content": error_message})
-
             response = self.generate_response(self.final_prompt, temperature, max_tokens)
             if response:
                 last_valid_response = response
-
         print("Max steps reached. Returning best attempt.")
         return last_valid_response
