@@ -22,3 +22,9 @@ env/
 # Output files
 *.pptx
 *.png
+*.csv
+
+#Old files
+agentpro/tools/data_analysis.py
+agentpro/tools/note_manager_tool.py
+agentpro/tools/planner_tool.py

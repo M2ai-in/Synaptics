@@ -12,7 +12,7 @@ Answer the following questions as best you can. You have access to the following
 {tools}
 
 "IMPORTANT: When you receive real-time information from the external tools, trust that information and include it in your final answer, even if it concerns events beyond your training cutoff.
-Use Either Action or Final Answer, but not both. If you use Action, you must provide Action Input and Observation. If you use Final Answer, you must not use Action."
+Only provide a Final Answer if you are certain no tools are needed. If a tool is relevant, you MUST call it using Action and wait for an Observation before concluding."
 
 Use the following format:
 
@@ -49,10 +49,10 @@ class AgentPro:
         react_prompt: str = REACT_AGENT_SYSTEM_PROMPT,
         final_prompt: str = FINAL_ANSWER_SYSTEM_PROMPT,
         client_details: Dict = None,
-        temperature: float = 0.7,
+        temperature: float = 0.1,
         max_tokens: int = 4000,
         max_steps: int = 2,
-        max_tool_calls: int = 1,
+        max_tool_calls: int = 2,
     ):
         self.client = (
             llm if llm else OpenAI(
@@ -154,6 +154,7 @@ class AgentPro:
             print("=" * 80)
 
             if "Final Answer:" in response and not self.parse_actions(response):
+                print("Final answer found in response.")
                 return response.split("Final Answer:")[-1].strip()
 
             actions = self.parse_actions(response)
@@ -172,7 +173,9 @@ class AgentPro:
                     print(f"🛠️ Calling tool: {action} with input: {action_input}")
                     try:
                         tool_result = tool.run(action_input, temperature, max_tokens)
+                        print(f"Tool result: {tool_result}")
                     except Exception as e:
+                        print(f"Error while calling tool: {e}")
                         tool_result = f"Error while calling tool: {e}"
                     tool_usage_count += 1
                     self.messages.append({"role": "assistant", "content": f"Observation: {tool_result}"})
