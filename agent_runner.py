@@ -8,11 +8,9 @@ from agentpro.tools import (
     SlideGenerationTool,
     DataScienceTool
 )
-
 class AgentRunner:
-    def __init__(self, temperature: float = 0.4, max_tokens: int = 4000):
+    def __init__(self, temperature: float = 0.1, max_tokens: int = 4000):
         dotenv.load_dotenv()
-
         self.temperature = temperature
         self.max_tokens = max_tokens
         self.client_details = self._get_client_details()
@@ -23,10 +21,9 @@ class AgentRunner:
             temperature=self.temperature,
             max_tokens=self.max_tokens
         )
-
     def _get_client_details(self) -> dict:
         if os.getenv("OPENROUTER_API_KEY"):
-            print("✅ Using OpenRouter API")
+            print("Using OpenRouter API")
             return {
                 "api_key": os.getenv("OPENROUTER_API_KEY"),
                 "api_base": "https://openrouter.ai/api/v1",
@@ -34,7 +31,7 @@ class AgentRunner:
                 "api_type": "openrouter"
             }
         elif os.getenv("OPENAI_API_KEY"):
-            print("✅ Using OpenAI API")
+            print("Using OpenAI API")
             return {
                 "api_key": os.getenv("OPENAI_API_KEY"),
                 "api_base": "https://api.openai.com/v1/",
@@ -42,11 +39,9 @@ class AgentRunner:
                 "api_type": "openai"
             }
         else:
-            raise EnvironmentError("❌ No API key found in environment variables.")
-
+            raise EnvironmentError("No API key found in environment variables.")
     def _get_model(self, env_key: str, fallback: str = "gpt-4o-mini") -> str:
         return os.getenv(env_key, fallback)
-
     def _init_tools(self) -> list:
         code_tool = CodeEngine(
             client_details=self.client_details,
@@ -68,13 +63,9 @@ class AgentRunner:
             temp=self.temperature,
             max_tokens=self.max_tokens
         )
-
         tools = [code_tool, yt_tool, slide_tool, data_tool]
-
         if os.getenv("TRAVERSAAL_ARES_API_KEY"):
             tools.append(AresInternetTool(client_details=self.client_details))
-
         return tools
-
     def run(self, prompt: str) -> str:
         return self.agent(prompt, clear_history=True)
