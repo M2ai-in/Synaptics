@@ -14,18 +14,14 @@ class CodeEngine(LLMTool):
     def parse_and_exec_code(self, response: str):
         print("Parsing and executing code...")
         result = re.search(r'```python\s*([\s\S]*?)\s*```', response)
-        if not result:
-            return "No Python code block found", "Failed to extract code"
+        if not result: return "No Python code block found", "Failed to extract code"
         code_string = result.group(1)
         if "pip install" in code_string.split("\n")[0]:
             print("Requires PIP package installations")
             packages = code_string.split("\n")[0].split("pip install")[-1].strip()
-            if "," in packages:
-                packages = packages.split(",")
-            elif " " in packages:
-                packages = packages.split(" ")
-            else:
-                packages = [packages]
+            if "," in packages:    packages = packages.split(",")
+            elif " " in packages:  packages = packages.split(" ")
+            else:                  packages = [packages]
             print(f"Installing packages: {packages}")
             for package in packages:
                 subprocess.check_call([sys.executable, "-m", "pip", "install", package])
@@ -54,14 +50,7 @@ class CodeEngine(LLMTool):
         return code, error
     def run(self, prompt: str, temp=0.7, max_tokens=4000) -> str:
         print(f"Code Generation Tool received: {prompt} with temp: {temp}, max_tokens: {max_tokens}")
-        is_code = (
-            prompt.strip().startswith("```python") or
-            prompt.strip().startswith("#") or
-            prompt.strip().startswith("import") or
-            "def " in prompt or
-            "class " in prompt or
-            prompt.strip().endswith(":")
-        )
+        is_code = (prompt.strip().startswith("```python") or prompt.strip().startswith("#") or prompt.strip().startswith("import") or "def " in prompt or "class " in prompt or prompt.strip().endswith(":"))
         if is_code:
             print("Detected raw Python code input, executing directly...")
             code, error = self.parse_and_exec_code(prompt)
