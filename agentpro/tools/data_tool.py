@@ -1,4 +1,3 @@
-# agentpro/tools/data_tool.py
 import re
 import os
 import io
@@ -9,15 +8,8 @@ import contextlib
 from .base import LLMTool
 class DataScienceTool(LLMTool):
     name: str = "Data Science Tool"
-    description: str = (
-        "A tool for analyzing and manipulating one or more CSV datasets using pandas. "
-    "You can ask complex queries involving filters, joins, aggregations, selection, manipulation, data Q/A etc."
-    )
-    arg: str = (
-        "A natural language string describing a data task such as "
-        "'Join employee.csv and department.csv to find average salary per department'. "
-        "CSV files mentioned in the prompt must exist."
-    )
+    description: str = ("A tool for analyzing and manipulating one or more CSV datasets using pandas. You can ask complex queries involving filters, joins, aggregations, selection, manipulation, data Q/A etc.")
+    arg: str = ("A natural language string describing a data task. CSVs/other files mentioned in the prompt must exist.")
     def __init__(self, client_details: dict = None, model_name: str = '', temp: float = 0.1, max_tokens: int = 1500, **data):
         super().__init__(client_details=client_details, model_name=model_name, **data)
         print(f"Using model: {self.model} for data tool")
@@ -40,11 +32,7 @@ class DataScienceTool(LLMTool):
                     info_buffer = io.StringIO()
                     df.info(buf=info_buffer)
                     sample = df.head(max_rows).to_markdown(index=False)
-                    schema_text += (
-                        f"📄 {filename} → `{df_name}`\n\n"
-                        f"Columns and Types:\n```\n{info_buffer.getvalue()}```\n\n"
-                        f"Sample Rows:\n{sample}\n\n---\n\n"
-                    )
+                    schema_text += (f"📄 {filename} → `{df_name}`\n\n" + f"Columns and Types:\n```\n{info_buffer.getvalue()}```\n\n" + f"Sample Rows:\n{sample}\n\n---\n\n")
                     dataframes[df_name] = df
                 except Exception as e:
                     schema_text += f"⚠️ Could not load {filename}: {e}\n\n"
@@ -62,11 +50,7 @@ class DataScienceTool(LLMTool):
                 info_buffer = io.StringIO()
                 df.info(buf=info_buffer)
                 sample = df.head(max_rows).to_markdown(index=False)
-                schema_text += (
-                    f"📄 {filename} → `{df_name}`\n\n"
-                    f"Columns and Types:\n```\n{info_buffer.getvalue()}```\n\n"
-                    f"Sample Rows:\n{sample}\n\n---\n\n"
-                )
+                schema_text += (f"📄 {filename} → `{df_name}`\n\n" + f"Columns and Types:\n```\n{info_buffer.getvalue()}```\n\n" + f"Sample Rows:\n{sample}\n\n---\n\n")
                 dataframes[df_name] = df
             except Exception as e:
                 schema_text += f"⚠️ Could not load {filename}: {e}\n\n"
@@ -88,7 +72,7 @@ class DataScienceTool(LLMTool):
             model=self.model,
             messages=[
                 {"role": "system", "content": (
-                    "You are a Python data analyst. Use pandas and numpy only. "
+                    "You are a Python data analyst. Use pandas as pd & numpy as np only. "
                     "Do not import CSVs, the DataFrames are already loaded with names like df_employees or df_states. "
                     "Always use print() to show the final result. Output executable Python code only."
                 )},
