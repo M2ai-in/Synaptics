@@ -1,13 +1,7 @@
 import os
 import dotenv
 from agentpro import AgentPro
-from agentpro.tools import (
-    AresInternetTool,
-    CodeEngine,
-    YouTubeSearchTool,
-    SlideGenerationTool,
-    DataScienceTool
-)
+from agentpro.tools import (AresInternetTool, CodeEngine, YouTubeSearchTool, SlideGenerationTool, DataScienceTool)
 class AgentRunner:
     def __init__(self, temperature: float = 0.1, max_tokens: int = 4000):
         dotenv.load_dotenv()
@@ -32,12 +26,7 @@ class AgentRunner:
             }
         elif os.getenv("OPENAI_API_KEY"):
             print("Using OpenAI API")
-            return {
-                "api_key": os.getenv("OPENAI_API_KEY"),
-                "api_base": "https://api.openai.com/v1/",
-                "MODEL": os.getenv("MODEL_NAME", "gpt-4o-mini"),
-                "api_type": "openai"
-            }
+            return {"api_key": os.getenv("OPENAI_API_KEY"), "api_base": "https://api.openai.com/v1/", "MODEL": os.getenv("MODEL_NAME", "gpt-4o-mini"), "api_type": "openai"}
         else:
             raise EnvironmentError("No API key found in environment variables.")
     def _get_model(self, env_key: str, fallback: str = "gpt-4o-mini") -> str:
