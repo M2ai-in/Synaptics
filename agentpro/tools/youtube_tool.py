@@ -22,33 +22,14 @@ class YouTubeSearchTool(LLMTool):
     def search_videos(self, query, max_results=5):
         """Search YouTube videos using DuckDuckGo."""
         try:
-            results = self.ddgs.videos(
-                keywords=query,
-                region="wt-wt",
-                safesearch="off",
-                timelimit="w",
-                resolution="high",
-                duration="medium",
-                max_results=max_results*2
-            )
+            results = self.ddgs.videos(keywords=query, region="wt-wt", safesearch="off", timelimit="w", resolution="high", duration="medium", max_results=max_results*2)
             results = sorted(results, key=lambda x: (-(x['statistics']['viewCount'] if x['statistics']['viewCount'] is not None else float('-inf'))))[:max_results]
             videos = []
             for result in results:
-                video_url = result.get('content')  # The actual video URL is in the 'content' field
+                video_url = result.get('content') 
                 video_id = self.extract_video_id(video_url)
                 if video_id:
-                    video_data = {
-                        'title': result['title'],
-                        'video_id': video_id,
-                        'description': result.get('description', ''),
-                        'link': video_url,
-                        'duration': result.get('duration', ''),
-                        'publisher': result.get('publisher', ''),
-                        'uploader': result.get('uploader', ''),
-                        'published': result.get('published', ''),
-                        'view_count': result.get('statistics', {}).get('viewCount', 'N/A'),
-                        'thumbnail': result.get('images', {}).get('large', '')
-                    }
+                    video_data = {'title': result['title'], 'video_id': video_id, 'description': result.get('description', ''), 'link': video_url, 'duration': result.get('duration', ''), 'publisher': result.get('publisher', ''), 'uploader': result.get('uploader', ''), 'published': result.get('published', ''), 'view_count': result.get('statistics', {}).get('viewCount', 'N/A'), 'thumbnail': result.get('images', {}).get('large', '')}
                     videos.append(video_data)
             if not videos: return "No YouTube videos found in the search results."
             return videos[:max_results]
@@ -64,17 +45,10 @@ class YouTubeSearchTool(LLMTool):
     def summarize_content(self, transcript):
         prompt = "Create a concise summary of the following video transcript"
         try:
-            response = self.client.chat.completions.create(
-                model=self.model,
-                messages=[
-                    {"role": "system", "content": "You are an expert content creator specializing in creating high-quality content from video transcripts."},
-                    {"role": "user", "content": f"{prompt}\n\nTranscript:\n{transcript}"}
-                ],
-                max_tokens=2000 ###########################
-            )
+            response = self.client.chat.completions.create(model=self.model, messages=[{"role": "system", "content": "You are an tool deisgned for creating high-quality content from video transcripts."}, {"role": "user", "content": f"{prompt}\n\nTranscript:\n{transcript}"}], max_tokens=2000)
             return response.choices[0].message.content.strip()
         except Exception as e: return None
-    def run(self, prompt: str, temp = 0.0, max_tokens= 4000) -> str: ###########################
+    def run(self, prompt: str, temp = 0.0, max_tokens= 4000) -> str:
         print(f"Calling YouTube Search Tool with prompt: {prompt}")
         try:
             videos = self.search_videos(prompt, 3)
