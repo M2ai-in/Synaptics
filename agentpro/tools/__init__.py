@@ -4,4 +4,4 @@ from .code_tool import CodeEngine
 from .youtube_tool import YouTubeSearchTool
 from .slide_tool import SlideGenerationTool
 from .data_tool import DataScienceTool
-__all__ = ['Tool', 'AresInternetTool', 'CodeEngine', 'YouTubeSearchTool', 'SlideGenerationTool', 'DataScienceTool']
+__all__ = ['Tool', 'AresInternetTool', 'CodeEngine', 'YouTubeSearchTool', 'SlideGenerationTool', 'DataScienceTool'] # add more tools when available
