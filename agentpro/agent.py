@@ -5,7 +5,6 @@ import os
 import re
 import time
 from .tools.base import Tool
-
 REACT_AGENT_SYSTEM_PROMPT = """
 Answer the following questions as best you can. You have access to the following tools:
 
@@ -53,12 +52,7 @@ class AgentPro:
         max_steps: int = 2,
         max_tool_calls: int = 2,
     ):
-        self.client = (
-            llm if llm else OpenAI(
-                api_key=client_details.get("api_key"),
-                base_url=client_details.get("api_base")
-            )
-        )
+        self.client = (llm if llm else OpenAI(api_key=client_details.get("api_key"), base_url=client_details.get("api_base")))
         self.model = client_details.get("MODEL", "gpt-4o-mini") if client_details else "gpt-4o-mini"
         print(f"Using model: {self.model} for AgentPro")
         self.tools = {tool.name.lower().replace(" ", "_"): tool for tool in tools}
@@ -114,7 +108,6 @@ class AgentPro:
                 inside_observation = True
             elif inside_input and not inside_observation:
                 current_input += "\n" + line
-
         if current_action and current_input:
             actions.append((current_action, self.safe_parse_input(current_input)))
         return actions
@@ -135,12 +128,10 @@ class AgentPro:
                 if "Rate limit" in str(e):
                     print("Rate limited, retrying...")
                     time.sleep(10)
-                else:
-                    raise e
+                else: raise e
         return "Error: Rate limit exceeded multiple times."
     def __call__(self, prompt: str, temperature: float = None, max_tokens: int = None, clear_history:bool=False) -> str:
-        if clear_history:
-            self.clear_history()
+        if clear_history: self.clear_history()
         temperature = temperature if temperature is not None else self.temperature
         max_tokens = max_tokens if max_tokens is not None else self.max_tokens
         response = self.generate_response(prompt, temperature, max_tokens)
