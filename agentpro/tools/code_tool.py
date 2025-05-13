@@ -1,27 +1,21 @@
-# agentpro\tools\code_tool.py
-
 import re
 import subprocess
 import sys
 from .base import LLMTool
-
 class CodeEngine(LLMTool):
     name: str = "Code Generation and Execution Tool"
     description: str = "A coding tool that can take a prompt and generate executable Python code. It parses and executes the code. Returns the code and the error if the code execution fails."
     arg: str = "A single string parameter describing the coding task. Donot include any code or comments. The tool will generate the code for you."
-
     def __init__(self, client_details: dict = None, model_name:str ='', temp:float = 0.7, max_tokens:int = 4000,**data):
         super().__init__(client_details=client_details, model_name=model_name,**data)
         print(f"Using model: {self.model} for code generation")
         self.temperature = temp if temp else 0.7
         self.max_tokens = max_tokens if max_tokens else 4000
-    
     def parse_and_exec_code(self, response: str):
         print("Parsing and executing code...")
         result = re.search(r'```python\s*([\s\S]*?)\s*```', response)
         if not result:
             return "No Python code block found", "Failed to extract code"
-        
         code_string = result.group(1)
         if "pip install" in code_string.split("\n")[0]:
             print("Requires PIP package installations")
@@ -35,8 +29,6 @@ class CodeEngine(LLMTool):
             print(f"Installing packages: {packages}")
             for package in packages:
                 subprocess.check_call([sys.executable, "-m", "pip", "install", package])
-
-        # Execute main code
         print("Executing main code...")
         try:
             exec(code_string)
@@ -44,7 +36,6 @@ class CodeEngine(LLMTool):
             print(f"Error executing generated code: {e}")
             return code_string, e
         return code_string, None
-
     def generate_code(self, prompt, temp, max_tokens):
         print(f"🎉Generating code for prompt")
         response = self.client.chat.completions.create(
@@ -61,7 +52,6 @@ class CodeEngine(LLMTool):
         print(f"Generated code: {response}")
         code, error = self.parse_and_exec_code(response)
         return code, error
-
     def run(self, prompt: str, temp=0.7, max_tokens=4000) -> str:
         print(f"Code Generation Tool received: {prompt} with temp: {temp}, max_tokens: {max_tokens}")
         is_code = (
