@@ -58,26 +58,10 @@ class DataScienceTool(LLMTool):
             raise FileNotFoundError("CSV files found in prompt, but none could be loaded.")
         return schema_text, dataframes
     def generate_code(self, task: str, schema_context: str, temp:float, max_tok:int) -> str:
-        prompt = (
-            f"You are a data scientist. The following DataFrames are available:\n\n"
-            f"{schema_context}\n\n"
-            f"Task: {task}\n\n"
-            f"Write pandas code that solves the task using the DataFrames above. "
-            f"Do NOT read CSVs — assume they are already loaded as variables. "
-            f"End your code with a final expression that returns the result, like a variable or value."
-            f" Use print() to ensure the result is visible in the output."
-            f" Output code only inside ```python code blocks."
-        )
+        prompt = (f"You are a data scientist. The following DataFrames are available:\n\n"+f"{schema_context}\n\n"+f"Task: {task}\n\n"+f"Write pandas code that solves the task using the DataFrames above. "+f"Do NOT read CSVs — assume they are already loaded as variables. "+f"End your code with a final expression that returns the result, like a variable or value."+f" Use print() to ensure the result is visible in the output."+f" Output code only inside ```python code blocks.")
         response = self.client.chat.completions.create(
             model=self.model,
-            messages=[
-                {"role": "system", "content": (
-                    "You are a Python data analyst. Use pandas as pd & numpy as np only. "
-                    "Do not import CSVs, the DataFrames are already loaded with names like df_employees or df_states. "
-                    "Always use print() to show the final result. Output executable Python code only."
-                )},
-                {"role": "user", "content": prompt}
-            ],
+            messages=[{"role": "system", "content": ("You are a Python data analyst. Use pandas as pd & numpy as np only. Do not import CSVs, the DataFrames are already loaded with names like df_employees or df_states. Always use print() to show the final result. Output executable Python code only.")}, {"role": "user", "content": prompt}],
             temperature=temp if temp else self.temperature,
             max_tokens=max_tok if max_tok else self.max_tokens
         )
