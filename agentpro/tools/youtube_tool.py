@@ -11,16 +11,14 @@ class YouTubeSearchTool(LLMTool):
     def __init__(self, client_details: dict = None, model_name:str ='gpt-4o-mini' ,**data):
         super().__init__(client_details=client_details, **data)
         if self.ddgs is None: self.ddgs = DDGS()
-    def extract_video_id(self, url):
-        """Extract video ID from YouTube URL."""
+    def extract_video_id(self, url): """Extract video ID from YouTube URL."""
         parsed_url = urlparse(url)
         if parsed_url.hostname in ['www.youtube.com', 'youtube.com']:
             if parsed_url.path == '/watch': return parse_qs(parsed_url.query)['v'][0]
             elif parsed_url.path.startswith('/shorts/'): return parsed_url.path.split('/')[2]
         elif parsed_url.hostname == 'youtu.be': return parsed_url.path[1:]
         return None
-    def search_videos(self, query, max_results=5):
-        """Search YouTube videos using DuckDuckGo."""
+    def search_videos(self, query, max_results=5): """Search YouTube videos using DuckDuckGo."""
         try:
             results = self.ddgs.videos(keywords=query, region="wt-wt", safesearch="off", timelimit="w", resolution="high", duration="medium", max_results=max_results*2)
             results = sorted(results, key=lambda x: (-(x['statistics']['viewCount'] if x['statistics']['viewCount'] is not None else float('-inf'))))[:max_results]
@@ -34,8 +32,7 @@ class YouTubeSearchTool(LLMTool):
             if not videos: return "No YouTube videos found in the search results."
             return videos[:max_results]
         except Exception as e: return f"Error searching videos: {str(e)}"
-    def get_transcript(self, video_id):
-        """Get transcript for a YouTube video."""
+    def get_transcript(self, video_id): """Get transcript for a YouTube video."""
         try:
             transcript_list = YouTubeTranscriptApi.get_transcript(video_id)
             return ' '.join([entry['text'] for entry in transcript_list])
