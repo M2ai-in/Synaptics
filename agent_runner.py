@@ -18,12 +18,7 @@ class AgentRunner:
     def _get_client_details(self) -> dict:
         if os.getenv("OPENROUTER_API_KEY"):
             print("Using OpenRouter API")
-            return {
-                "api_key": os.getenv("OPENROUTER_API_KEY"),
-                "api_base": "https://openrouter.ai/api/v1",
-                "MODEL": os.getenv("MODEL_NAME", "gpt-4o-mini"),
-                "api_type": "openrouter"
-            }
+            return {"api_key": os.getenv("OPENROUTER_API_KEY"), "api_base": "https://openrouter.ai/api/v1", "MODEL": os.getenv("MODEL_NAME", "gpt-4o-mini"), "api_type": "openrouter"}
         elif os.getenv("OPENAI_API_KEY"):
             print("Using OpenAI API")
             return {"api_key": os.getenv("OPENAI_API_KEY"), "api_base": "https://api.openai.com/v1/", "MODEL": os.getenv("MODEL_NAME", "gpt-4o-mini"), "api_type": "openai"}
@@ -38,21 +33,15 @@ class AgentRunner:
             temp=self.temperature,
             max_tokens=self.max_tokens
         )
-        yt_tool = YouTubeSearchTool(
-            client_details=self.client_details,
-            model_name=self._get_model("YT_MODEL_NAME")
-        )
-        slide_tool = SlideGenerationTool(
-            client_details=self.client_details,
-            model_name=self._get_model("SLIDE_MODEL_NAME")
-        )
+        yt_tool = YouTubeSearchTool(client_details=self.client_details, model_name=self._get_model("YT_MODEL_NAME"))
+        slide_tool = SlideGenerationTool(client_details=self.client_details, model_name=self._get_model("SLIDE_MODEL_NAME"))
         data_tool = DataScienceTool(
             client_details=self.client_details,
             model_name=self._get_model("DATA_MODEL_NAME"),
             temp=self.temperature,
             max_tokens=self.max_tokens
         )
-        tools = [code_tool, yt_tool, slide_tool, data_tool]
+        tools = [code_tool, yt_tool, slide_tool, data_tool] # ADD MORE TOOLS WHEN AVAILABLE
         if os.getenv("TRAVERSAAL_ARES_API_KEY"):
             tools.append(AresInternetTool(client_details=self.client_details))
         return tools
