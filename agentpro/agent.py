@@ -69,7 +69,8 @@ class AgentPro:
         if system_prompt:
             self.messages.append({"role": "system", "content": system_prompt})
         self.messages.append({"role": "system", "content": self.react_prompt})
-    def clear_history(self): """Resets the conversation to the initial system prompts."""
+    def clear_history(self): 
+        """Resets the conversation to the initial system prompts."""
         self.messages = []
         if self.system_prompt:
             self.messages.append({"role": "system", "content": self.system_prompt})
