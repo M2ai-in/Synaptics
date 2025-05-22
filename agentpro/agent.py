@@ -49,7 +49,7 @@ class AgentPro:
         client_details: Dict = None,
         temperature: float = 0.1,
         max_tokens: int = 4000,
-        max_steps: int = 2,
+        max_steps: int = 10,
         max_tool_calls: int = 2,
     ):
         self.client = (llm if llm else OpenAI(api_key=client_details.get("api_key"), base_url=client_details.get("api_base")))
