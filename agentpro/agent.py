@@ -50,7 +50,7 @@ class AgentPro:
         temperature: float = 0.1,
         max_tokens: int = 4000,
         max_steps: int = 10,
-        max_tool_calls: int = 2,
+        max_tool_calls: int = 12,
     ):
         self.client = (llm if llm else OpenAI(api_key=client_details.get("api_key"), base_url=client_details.get("api_base")))
         self.model = client_details.get("MODEL", "gpt-4o-mini") if client_details else "gpt-4o-mini"
