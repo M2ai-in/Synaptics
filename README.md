@@ -1,5 +1,3 @@
-## Clone of https://github.com/traversaal-ai/AgentPro
-
 ## 🛠️ Tech Stack & Agent Architecture
 
 - **LLM Gateway**: OpenRouter + OpenAI (via AgentPro)
